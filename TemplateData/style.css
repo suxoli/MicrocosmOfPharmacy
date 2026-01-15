@@ -45,21 +45,18 @@ body {
     height: 130px; 
     background: url('unity-logo-dark.png') no-repeat center 
 }
-#unity-progress-bar-empty {
-    width: 200px; /* �ӿ� */
-    height: 20px;
-    margin-top: 10px;
-    margin-left: 0;
-    background: #e0e0e0; /* ǳ�ҵ�ɫ */
-    border-radius: 10px; /* Բ�� */
+#unity-progress-bar-empty { 
+    width: 141px; 
+    height: 18px; 
+    margin-top: 10px; 
+    margin-left: 6.5px; 
+    background: url('progress-bar-empty-dark.png') no-repeat center 
 }
-
-#unity-progress-bar-full {
-    width: 0%;
-    height: 20px;
-    margin-top: -18px; /* ������� */
-    background: #4CAF50; /* ��ɫ���� */
-    border-radius: 10px;
+#unity-progress-bar-full { 
+    width: 0%; 
+    height: 18px; 
+    margin-top: 10px; 
+    background: url('progress-bar-full-dark.png') no-repeat center 
 }
 
 /* ����footer�����������ȫ����ť�� */
