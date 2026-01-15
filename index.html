@@ -18,6 +18,9 @@
             min-height: -webkit-fill-available;
             width: 100vw;
             overflow: hidden;
+            /* 通用背景（存放于TemplateData，适配1080×1920） */
+            background: url('TemplateData/background.png') no-repeat center center;
+            background-size: 100% 100%;
         }
 
         .ctaDiv {
@@ -30,8 +33,9 @@
             right: 0;
             top: 0;
             bottom: 0;
-            background: #fffa;
+            background: rgba(0,0,0,0.8); /* 黑色半透明 */
             z-index: 99;
+            color: white; /* 弹窗内文字默认白色 */
         }
     </style>
 </head>
@@ -41,8 +45,8 @@
     <canvas id="video-canvas" style="width:100%; height:100%; object-fit:cover; position:absolute; z-index: -99; "></canvas>
     <div id="startARDiv" class="ctaDiv">
         <select id="chooseCamSel" style="display: none;" onchange="SelectCam()"></select>
-        <p style="text-align: center; width:60vw;">是否允许访问您设备的摄像头，否则将无法使用</p>
-        <button id="startARButton" onclick="StartAR()" style="display:none">允许访问</button>
+        <p style="text-align: center; width:60vw;">请允许访问摄像头，以体验AR互动功能～</p>
+        <button id="startARButton" onclick="StartAR()" style="display:none; padding: 15px 30px; font-size: 18px; background: #4CAF50; color: white; border: none; border-radius: 8px; margin-top: 20px;">允许访问</button>
     </div>
     <div id="screenshotDiv" style="display: none;" class="ctaDiv">
         <div style="position:relative; background-color:white; padding:10px; box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.3), 0 6px 20px 0 rgba(0, 0, 0, 0.25);">
@@ -61,6 +65,13 @@
     </div>
     <div id="errorDiv" class="ctaDiv" style="display: none; background:#aaa">
         <p id="errorText" style="text-align: center; width:60vw; color:white"></p>
+    </div>
+    <!-- 新增加载弹窗 -->
+    <div id="loadingDiv" class="ctaDiv" style="display: none; background:rgba(0,0,0,0.8); color:white;">
+        <p style="text-align: center; width:60vw;">AR功能加载中，请稍候...</p>
+        <div style="width: 60vw; height: 4px; background: #eee; margin-top: 20px;">
+            <div id="loadingProgress" style="width: 0%; height: 100%; background: #4CAF50;"></div>
+        </div>
     </div>
     <div id="unity-container" class="unity-mobile">
         <canvas id="unity-canvas" style="width: 100%; height: 100%; background: #0000; z-index: -98"></canvas>
@@ -131,6 +142,7 @@
                 canvas.style.height = window.innerHeight + "px";
 
                 document.getElementById("startARDiv").style.display = "none";
+                ShowLoading(); // 新增：显示加载弹窗
                 createUnityInstance(document.querySelector("#unity-canvas"), {
                     dataUrl: "Build/MicrocosmOfPharmacy.data",
                     frameworkUrl: "Build/MicrocosmOfPharmacy.framework.js",
@@ -149,7 +161,7 @@
                 ).then((unityInstance) => {
                     window.unityInstance = unityInstance;
                     RequestWebcam();
-
+                    HideLoading(); // 新增：隐藏加载弹窗
                     loadingBar.style.display = "none";
                 });
                 loadingBar.style.display = "block";
@@ -285,6 +297,19 @@
             function ShowError(error){
                 document.getElementById("errorDiv").style.display = "flex";
                 document.getElementById("errorText").innerHTML = error;
+        }
+
+            // 新增：显示加载弹窗
+            function ShowLoading() {
+                document.getElementById("loadingDiv").style.display = "flex";
+            }
+            // 新增：更新加载进度
+            function UpdateLoadingProgress(progress) {
+                document.getElementById("loadingProgress").style.width = (progress * 100) + "%";
+            }
+            // 新增：隐藏加载弹窗
+            function HideLoading() {
+                document.getElementById("loadingDiv").style.display = "none";
             }
 
             function ShowScreenshot(dataUrl){
