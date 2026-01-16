@@ -1,143 +1,344 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
-    <!-- 参考第二份文档优化视口配置，提升多设备适配 -->
-    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=yes">
-    <!-- 保留WebGL兼容配置 -->
-    <meta name="webgl" content="true">
-    <meta name="allow-webgl" content="true">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Cache-Control" content="no-cache">
-    <meta http-equiv="Expires" content="0">
-    <meta http-equiv="Access-Control-Allow-Origin" content="*">
-    <meta http-equiv="x-rim-auto-match" content="none">
-    <meta name="format-detection" content="telephone=no">
-    <meta name="full-screen" content="yes">
-    <meta name="x5-fullscreen" content="true">
-    <meta name="360-fullscreen" content="true">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="x5-page-mode" content="app">
-    <meta name="browsermode" content="application">
-    <title>YYSMART | MicrocosmOfPharmacy</title>
-    <link rel="shortcut icon" href="TemplateData/favicon.ico">
+    <meta name="viewport" content='width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1.0, user-scalable=no, shrink-to-fit=yes'>
+    <title>Unity WebGL Player | MicrocosmOfPharmacy</title>
     <link rel="stylesheet" href="TemplateData/style.css">
+
     <style>
-        /* 参考第二份文档简化重置样式，保留核心重置逻辑 */
-        * {
-            margin: 0;
-            padding: 0;
-            font-style: normal;
-            box-sizing: border-box;
-        }
-
-        a {
-            text-decoration: none;
-            -webkit-tap-highlight-color: rgba(0,0,0,0);
-            -webkit-tap-highlight-color: transparent;
-            outline: none;
-        }
-
-        /* 参考第二份文档优化根节点样式，提升全屏适配 */
         html {
-            font-size: 12px;
             height: -webkit-fill-available;
-            -webkit-text-size-adjust: none !important;
-            -moz-text-size-adjust: none !important;
-            -ms-text-size-adjust: none !important;
-            text-size-adjust: none !important;
         }
 
         body {
+            margin: 0;
+            padding: 0;
             min-height: 100vh;
             min-height: -webkit-fill-available;
             width: 100vw;
             overflow: hidden;
-            position: relative;
         }
 
-        /* 封装iframe容器，参考第二份文档的unity-container风格 */
-        #frame-container {
-            width: 100%;
+        .ctaDiv {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            background: #fffa;
+            z-index: 99;
+        }
+        /* ========== 仅修改/新增 Unity 加载相关 UI 样式 ========== */
+        #unity-loading-bar {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            max-width: 400px;
+            z-index: 100;
+        }
+
+        #unity-logo {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 20px;
+            background: url('TemplateData/unity-logo-dark.png') center/contain no-repeat; /* 可替换为自定义logo */
+        }
+
+        #unity-progress-bar-empty {
+            height: 12px;
+            border-radius: 6px;
+            background-color: #f0f0f0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1) inset;
+            overflow: hidden;
+        }
+
+        #unity-progress-bar-full {
             height: 100%;
-            position: relative;
+            border-radius: 6px;
+            background: linear-gradient(90deg, #6190e8, #7b68ee);
+            transition: width 0.2s ease;
+            width: 0;
         }
-
-        #Frame {
-            border: none;
-            display: block;
-            width: 100%;
-            height: 100%;
-            /* 保留WebGL渲染优化 */
-            -webkit-backface-visibility: hidden;
-            backface-visibility: hidden;
-            perspective: 1000px;
-            transition: transform 0.3s ease; /* 新增过渡动画，提升旋转流畅度 */
-        }
-
-        /* 优化横竖屏旋转样式，简化逻辑 */
-        .landscape-screen {
-            transform-origin: top left;
-            transform: rotate(90deg) translateY(-100%);
-            width: 100vh !important;
-            height: 100vw !important;
-        }
+        /* ========== Unity 加载样式结束 ========== */
     </style>
 </head>
 <body>
-    <!-- 参考第二份文档的容器封装方式，新增iframe容器 -->
-    <div id="frame-container">
-        <iframe id="Frame"
-                src=""
-                allow="camera *; microphone *; fullscreen *; webgl *; accelerometer *"
-                allowfullscreen="true"
-                webkitallowfullscreen="true"
-                mozallowfullscreen="true">
-        </iframe>
+
+    <video id="webcam-video" muted autoplay playsinline style="width:1px;position:absolute"></video>
+    <canvas id="video-canvas" style="width:100%; height:100%; object-fit:cover; position:absolute; z-index: -99; "></canvas>
+    <div id="startARDiv" class="ctaDiv">
+        <select id="chooseCamSel" style="display: none;" onchange="SelectCam()"></select>
+        <p style="text-align: center; width:60vw;">此增强现实体验需要访问您设备的摄像头</p>
+        <button id="startARButton" onclick="StartAR()" style="display:none">允许访问</button>
     </div>
-
+    <div id="screenshotDiv" style="display: none;" class="ctaDiv">
+        <div style="position:relative; background-color:white; padding:10px; box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.3), 0 6px 20px 0 rgba(0, 0, 0, 0.25);">
+            <img id="screenshotImg" src="" alt="截图" style="width:80vw; height:80vh">
+            <button onclick="document.getElementById('screenshotDiv').style.display = 'none';" style="position:absolute; transform:translateY(-100%); right:0; top:0">关闭</button>
+        </div>
+    </div>
+    <div id="confirmUrlDiv" style="display: none;" class="ctaDiv">
+        <div style="position:relative; background-color:white; padding:10px; box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.3), 0 6px 20px 0 rgba(0, 0, 0, 0.25); width: 80vw; display:flex; flex-direction: column; align-items: center;">
+            <p id="confirmUrlText" style="text-align: center; width:80%; overflow: hidden; text-overflow: ellipsis;">您确定要访问 url.com 吗？</p>
+            <div>
+                <button onclick="window.open(newUrlString, '_blank').focus(); document.getElementById('confirmUrlDiv').style.display = 'none'">访问网站</button>
+                <button onclick="document.getElementById('confirmUrlDiv').style.display = 'none'">返回</button>
+            </div>
+        </div>
+    </div>
+    <div id="errorDiv" class="ctaDiv" style="display: none; background:#aaa">
+        <p id="errorText" style="text-align: center; width:60vw; color:white"></p>
+    </div>
+    <div id="unity-container" class="unity-mobile">
+        <canvas id="unity-canvas" style="width: 100%; height: 100%; background: #0000; z-index: -98"></canvas>
+        <div id="unity-loading-bar">
+            <div id="unity-logo"></div>
+            <div id="unity-progress-bar-empty">
+                <div id="unity-progress-bar-full"></div>
+            </div>
+        </div>
+        <canvas id="video-canvas"></canvas>
+    </div>
+    <script src="arcamera.js" type="text/javascript"></script>
+    <script src="htracker.js" type="text/javascript"></script>
+    <script src="Build/MicrocosmOfPharmacy.loader.js"></script>
     <script>
-        // 初始化变量，参考第二份文档的初始化风格
-        let orientation = window.orientation || window.screen.orientation.angle;
-        const Frame = document.getElementById("Frame");
-        const frameContainer = document.getElementById("frame-container");
+            var initialize = async() =>{
+                var unityCanvas = document.querySelector("#unity-canvas");
+                var videoCanvas = document.querySelector("#video-canvas");
+                window.arCamera = new ARCamera(unityCanvas, videoCanvas);
+                window.hTracker = new HandTracker(arCamera);
+                try{
+                    var numHands = 2; //<--设置最大检测手数
 
-        // 初始化iframe链接，提示信息改为中文
-        if (Frame) {
-            Frame.src = "game.html";
-        } else {
-            console.error("未找到ID为Frame的iframe元素");
-        }
+                    //initialize using mediapipe CDN
+                    // await window.hTracker.initialize(
+                    //     "./opencv.js",
+                    //     "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.6",
+                    //     "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.6/wasm",
+                    //     "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task",
+                    //     numHands,
+                    //     0.1, //检测置信度
+                    //     0.1, //存在置信度
+                    //     0.1, //跟踪置信度
+                    // );
 
-        // 封装横竖屏处理函数，提升代码复用性
-        function handleOrientationChange() {
-            orientation = window.orientation || window.screen.orientation.angle;
-            // 竖屏状态（0/180/-180度）
-            if ([0, 180, -180].includes(orientation)) {
-                Frame.classList.add("landscape-screen");
-            } else {
-                Frame.classList.remove("landscape-screen");
+                    //本地初始化
+                    await window.hTracker.initialize(
+                        "./opencv.js",
+                        "./mediapipe/tasks-vision@0.10.6.js",
+                        "./mediapipe/wasm",
+                        "./mediapipe/hand_landmarker.task",
+                        numHands,
+                        0.3, //检测置信度
+                        0.3, //存在置信度
+                        0.3, //跟踪置信度
+                    );
+
+                    console.log("手部追踪器初始化完成！");
+                }
+                catch (error){
+                    console.error("手部追踪器初始化失败。是否缺少 opencv.js？ " + error);
+                    ShowError("体验初始化失败。");
+                    return;
+                }
+
+                await LoadWebcams();
+                document.getElementById("startARButton").style.display = "block";
             }
-            // 旋转后重置渲染上下文，保留原有逻辑
-            Frame.style.display = 'none';
-            setTimeout(() => Frame.style.display = 'block', 50);
-        }
 
-        // 初始执行横竖屏处理
-        handleOrientationChange();
+            initialize();
 
-        // 监听横竖屏切换事件，兼容不同浏览器
-        window.addEventListener('orientationchange', handleOrientationChange);
-        window.addEventListener('screenorientationchange', handleOrientationChange);
+            var container = document.querySelector("#unity-container");
+            var canvas = document.querySelector("#unity-canvas");
+            var loadingBar = document.querySelector("#unity-loading-bar");
+            var progressBarFull = document.querySelector("#unity-progress-bar-full");
+            function StartAR() {
+                canvas.style.width = window.innerWidth + "px";
+                canvas.style.height = window.innerHeight + "px";
 
-        // 屏蔽媒体设备报错，提示信息改为中文
-        if (!navigator.mediaDevices) {
-            navigator.mediaDevices = {
-                getUserMedia: () => Promise.reject('摄像头访问已禁用'),
-                enumerateDevices: () => Promise.resolve([])
+                document.getElementById("startARDiv").style.display = "none";
+                createUnityInstance(document.querySelector("#unity-canvas"), {
+                    dataUrl: "Build/MicrocosmOfPharmacy.data",
+                    frameworkUrl: "Build/MicrocosmOfPharmacy.framework.js",
+                    codeUrl: "Build/MicrocosmOfPharmacy.wasm",
+                    streamingAssetsUrl: "StreamingAssets",
+                    companyName: "NanJingYaoYu",
+                    productName: "MicrocosmOfPharmacy",
+                    productVersion: "0.1",
+                    //webglContextAttributes: { "preserveDrawingBuffer": true },
+                    // matchWebGLToCanvasSize: false, // 取消注释可单独控制 WebGL 画布渲染尺寸和 DOM 元素尺寸
+                    // devicePixelRatio: 1, // 取消注释可在高 DPI 显示器上覆盖低 DPI 渲染
+                    },
+                    (progress) => {
+                        progressBarFull.style.width = 100 * progress + "%";
+                    }
+                ).then((unityInstance) => {
+                    window.unityInstance = unityInstance;
+                    RequestWebcam();
+
+                    loadingBar.style.display = "none";
+                });
+                loadingBar.style.display = "block";
+            }
+            //在此设置摄像头朝向 ('environment' 后置, 'user' 前置, '' 自动)
+		window.unityFacingMode = "user"
+
+            window.WEBCAM_SETTINGS = {
+                video: {
+                    facingMode: unityFacingMode,
+                },
+                audio: false
             };
-        }
+
+            window.requestingForPermissions = false;
+            async function RequestWebcam(){
+                window.requestingForPermissions = true;
+                try{
+                    window.webcamStream = await navigator.mediaDevices.getUserMedia(window.WEBCAM_SETTINGS);
+                    arCamera.setFlipped(window.WEBCAM_SETTINGS.video.facingMode == 'user');
+
+                    console.log("摄像头访问已授权");
+                    requestingForPermissions = false;
+                }
+                catch (err) {
+                    //用户拒绝摄像头权限 - 显示错误面板
+                    console.error("获取媒体设备失败 - " , err);
+                    ShowError("体验启动失败。摄像头权限被拒绝");
+                    window.requestingForPermissions = false;
+                }
+            }
+
+            async function StartWebcam(){
+                console.log("启动摄像头")
+
+                while (window.requestingForPermissions) {
+                    // 等待权限请求完成
+                    console.log("等待权限授权...");
+                    await new Promise(resolve => setTimeout(resolve, 100)); // 可调整延迟时间
+                }
+
+                console.log("已获取权限");
+
+                if(window.webcamStream)
+                {
+                    const video = document.querySelector("#webcam-video");
+                    video.srcObject = webcamStream;
+                    try {
+                        await arCamera.startWebcam(video);
+                        console.log("摄像头启动成功");
+
+                        window.unityInstance.SendMessage('ARCamera', 'OnStartWebcamSuccess');
+                    }
+                    catch(err){
+                        console.error("摄像头启动失败 - ", err);
+                        window.unityInstance.SendMessage('ARCamera', 'OnStartWebcamFail');
+                    }
+                }
+                else{
+                    console.error("摄像头启动失败 - 权限未授权");
+                    window.unityInstance.SendMessage('ARCamera', 'OnStartWebcamFail');
+                }
+            }
+            async function LoadWebcams(){
+                let camDevices = [];
+                // let backCams = [];
+                let devices = await navigator.mediaDevices.enumerateDevices();
+                var ctr = 0;
+                devices.forEach(mediaDevice => {
+                    if (mediaDevice.kind === 'videoinput') {
+
+                        if(window.unityFacingMode == 'environment' && !mediaDevice.label.includes('facing front')){
+                            //仅后置摄像头
+                            camDevices.push(mediaDevice);
+                        }
+                        else if(window.unityFacingMode == 'user' && mediaDevice.label.includes('facing front')){
+                            //仅前置摄像头
+                            camDevices.push(mediaDevice);
+                        }
+                        else{
+                            //前后置都包含
+                            camDevices.push(mediaDevice);
+                        }
+
+                        ctr++;
+                    }
+                });
+                var select = document.getElementById("chooseCamSel");
+                select.style.display = "block";
+                var count = 0;
+                camDevices.forEach(mediaDevice => {
+                    const option = document.createElement('option');
+                    option.value = mediaDevice.deviceId;
+                    let label = `摄像头 ${count}`;
+                    if (mediaDevice.label) {
+                        label = mediaDevice.label
+                    }
+                    const textNode = document.createTextNode(label);
+                    option.appendChild(textNode);
+                    select.appendChild(option);
+                    count++;
+                });
+                // iTracker.WEBCAM_NAME = select.options[select.selectedIndex].innerHTML;
+            }
+            function SelectCam(){
+                var select = document.getElementById("chooseCamSel");
+                const deviceId = select.value;
+                window.WEBCAM_SETTINGS.video['deviceId'] = deviceId;
+                //console.log(window.WEBCAM_SETTINGS);
+                // iTracker.WEBCAM_NAME = select.options[select.selectedIndex].innerHTML;
+            }
+
+            async function FlipCam(){
+                arCamera.stopWebcam();
+                window.WEBCAM_SETTINGS.video.deviceId = '';
+
+                if(window.WEBCAM_SETTINGS.video.facingMode == 'user'){
+                    window.WEBCAM_SETTINGS.video.facingMode = 'environment';
+                    arCamera.setFlipped(false);
+                }
+                else{
+                    window.WEBCAM_SETTINGS.video.facingMode = 'user';
+                    arCamera.setFlipped(true);
+                }
+                window.webcamStream = await navigator.mediaDevices.getUserMedia(window.WEBCAM_SETTINGS);
+
+                const video = document.querySelector("#webcam-video");
+                video.srcObject = webcamStream;
+
+                await arCamera.startWebcam(video);
+            }
+
+            function ShowError(error){
+                document.getElementById("errorDiv").style.display = "flex";
+                document.getElementById("errorText").innerHTML = error;
+            }
+
+            function ShowScreenshot(dataUrl){
+                document.getElementById("screenshotDiv").style.display = "flex";
+                document.getElementById("screenshotImg").src = dataUrl;
+                document.getElementById("screenshotImg").style.width = "80vw";
+                document.getElementById("screenshotImg").style.height = 80 / window.innerWidth * window.innerHeight + "vw";
+            }
+
+            function ShowConfirmUrl(url){
+                document.getElementById("confirmUrlDiv").style.display = "flex";
+                window.newUrlString = url;
+                document.getElementById("confirmUrlText").innerText = "您确定要访问 " + url;
+            }
+
+            window.hTracker_GLOBALS = {
+                //在此放置全局设置
+            }
+
+
     </script>
 </body>
 </html>
