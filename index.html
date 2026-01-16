@@ -7,10 +7,9 @@
     <link rel="stylesheet" href="TemplateData/style.css">
 
     <style>
-        html {
+        html{
             height: -webkit-fill-available;
         }
-
         body {
             margin: 0;
             padding: 0;
@@ -19,7 +18,6 @@
             width: 100vw;
             overflow: hidden;
         }
-
         .ctaDiv {
             display: flex;
             flex-direction: column;
@@ -41,21 +39,21 @@
     <canvas id="video-canvas" style="width:100%; height:100%; object-fit:cover; position:absolute; z-index: -99; "></canvas>
     <div id="startARDiv" class="ctaDiv">
         <select id="chooseCamSel" style="display: none;" onchange="SelectCam()"></select>
-        <p style="text-align: center; width:60vw;">是否允许访问您设备的摄像头，否则将无法使用</p>
-        <button id="startARButton" onclick="StartAR()" style="display:none">允许访问</button>
+        <p style="text-align: center; width:60vw;">This augmented reality experience requires access to your device's camera</p>
+        <button id="startARButton" onclick="StartAR()" style="display:none">ALLOW ACCESS</button>
     </div>
     <div id="screenshotDiv" style="display: none;" class="ctaDiv">
         <div style="position:relative; background-color:white; padding:10px; box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.3), 0 6px 20px 0 rgba(0, 0, 0, 0.25);">
-            <img id="screenshotImg" src="" alt="截图" style="width:80vw; height:80vh">
-            <button onclick="document.getElementById('screenshotDiv').style.display = 'none';" style="position:absolute; transform:translateY(-100%); right:0; top:0">关闭</button>
+            <img id="screenshotImg" src="" alt="screenshot" style="width:80vw; height:80vh">
+            <button onclick="document.getElementById('screenshotDiv').style.display = 'none';" style="position:absolute; transform:translateY(-100%); right:0; top:0">Close</button>
         </div>
     </div>
     <div id="confirmUrlDiv" style="display: none;" class="ctaDiv">
         <div style="position:relative; background-color:white; padding:10px; box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.3), 0 6px 20px 0 rgba(0, 0, 0, 0.25); width: 80vw; display:flex; flex-direction: column; align-items: center;">
-            <p id="confirmUrlText" style="text-align: center; width:80%; overflow: hidden; text-overflow: ellipsis;">您确定要访问url.com吗？</p>
+            <p id="confirmUrlText" style="text-align: center; width:80%; overflow: hidden; text-overflow: ellipsis;">Are you sure you want to visit url.com?</p>
             <div>
-                <button onclick="window.open(newUrlString, '_blank').focus(); document.getElementById('confirmUrlDiv').style.display = 'none'">访问网站</button>
-                <button onclick="document.getElementById('confirmUrlDiv').style.display = 'none'">返回</button>
+                <button onclick="window.open(newUrlString, '_blank').focus(); document.getElementById('confirmUrlDiv').style.display = 'none'">VISIT SITE</button>
+                <button onclick="document.getElementById('confirmUrlDiv').style.display = 'none'">GO BACK</button>
             </div>
         </div>
     </div>
@@ -108,14 +106,14 @@
                         0.3, //trackConfidence, //trackConfidence
                     );
 
-                    console.log("手部追踪器初始化成功!");
+                    console.log("HandTracker initialized!");
                 }
                 catch (error){
-                    console.error("手部追踪器初始化失败：缺少opencv.js " + error);
-                    ShowError("初始化失败，请检查相关资源是否完整");
+                    console.error("Failed to initialize HandTracker. Are you missing opencv.js? " + error);
+                    ShowError("Failed to initialize the experience.");
                     return;
                 }
-
+                
                 await LoadWebcams();
                 document.getElementById("startARButton").style.display = "block";
             }
@@ -129,7 +127,7 @@
             function StartAR() {
                 canvas.style.width = window.innerWidth + "px";
                 canvas.style.height = window.innerHeight + "px";
-
+                
                 document.getElementById("startARDiv").style.display = "none";
                 createUnityInstance(document.querySelector("#unity-canvas"), {
                     dataUrl: "Build/MicrocosmOfPharmacy.data",
@@ -171,27 +169,27 @@
                     window.webcamStream = await navigator.mediaDevices.getUserMedia(window.WEBCAM_SETTINGS);
                     arCamera.setFlipped(window.WEBCAM_SETTINGS.video.facingMode == 'user');
 
-                    console.log("摄像头访问权限已授予");
+                    console.log("Webcam access granted");
                     requestingForPermissions = false;
                 }
                 catch (err) {
                     //user denied camera permission - show error panel
-                    console.error("获取媒体设备失败 - " , err);
-                    ShowError("体验启动失败。摄像头权限被拒绝");
+                    console.error("getUserMedia error - " , err);
+                    ShowError("Failed to start the experience. Camera permission was denied");
                     window.requestingForPermissions = false;
-                }
+                }           
             }
 
             async function StartWebcam(){
-                console.log("启动摄像头")
+                console.log("StartWebcam")
 
                 while (window.requestingForPermissions) {
                     // Wait until requestingForPermissions becomes true.
-                    console.log("等待权限授予中...");
+                    console.log("Waiting for permissions...");
                     await new Promise(resolve => setTimeout(resolve, 100)); // Adjust the delay time as needed.
                 }
 
-                console.log("已获取权限");
+                console.log("Got Permissions");
 
                 if(window.webcamStream)
                 {
@@ -199,19 +197,19 @@
                     video.srcObject = webcamStream;
                     try {
                         await arCamera.startWebcam(video);
-                        console.log("摄像头启动成功");
+                        console.log("Webcam started successfully");
 
                         window.unityInstance.SendMessage('ARCamera', 'OnStartWebcamSuccess');
                     }
                     catch(err){
-                        console.error("摄像头启动失败 - ", err);
+                        console.error("Webcam failed to start - ", err);
                         window.unityInstance.SendMessage('ARCamera', 'OnStartWebcamFail');
-                    }
+                    }   
                 }
                 else{
-                    console.error("摄像头启动失败 - 权限尚未授予");
+                    console.error("Webcam failed to start - permission not yet granted");
                     window.unityInstance.SendMessage('ARCamera', 'OnStartWebcamFail');
-                }
+                }  
             }
             async function LoadWebcams(){
                 let camDevices = [];
@@ -232,8 +230,8 @@
                         else{
                             //back and front
                             camDevices.push(mediaDevice);
-                        }
-
+                        }   
+                        
                         ctr++;
                     }
                 });
@@ -243,7 +241,7 @@
                 camDevices.forEach(mediaDevice => {
                     const option = document.createElement('option');
                     option.value = mediaDevice.deviceId;
-                    let label = `摄像头 ${count}`;
+                    let label = `Camera ${count}`;
                     if (mediaDevice.label) {
                         label = mediaDevice.label
                     }
@@ -297,13 +295,13 @@
             function ShowConfirmUrl(url){
                 document.getElementById("confirmUrlDiv").style.display = "flex";
                 window.newUrlString = url;
-                document.getElementById("confirmUrlText").innerText = "您确定要访问 " + url;
+                document.getElementById("confirmUrlText").innerText = "Are you sure you want to visit " + url;                
             }
 
             window.hTracker_GLOBALS = {
                 //place global settings here
             }
-
+            
 
     </script>
 </body>
