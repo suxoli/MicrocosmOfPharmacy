@@ -586,7 +586,7 @@
         }
 
         var script = document.createElement("script");
-        script.src = loaderUrl;
+        //script.src = loaderUrl;
         script.onload = () => {
             createUnityInstance(document.querySelector("#unity-canvas"), config, (progress) => {
                 if (isMobileBrowser) {
