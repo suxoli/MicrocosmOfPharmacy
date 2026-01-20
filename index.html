@@ -617,8 +617,7 @@ async function FlipCam() {
         window.hTracker_GLOBALS = {};
 
         // ========== 核心修改：等待DOM完全加载后再执行初始化 ==========
-        // 方式1：监听DOMContentLoaded事件（推荐）
-document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function() {
     // 保存原始方法（防止覆盖后丢失逻辑）
     const originalSetFlipped = ARCamera.prototype.setFlipped;
     const originalResizeCanvas = ARCamera.prototype.resizeCanvas;
@@ -637,6 +636,7 @@ document.addEventListener('DOMContentLoaded', function() {
             this.pendingSetFlipped = isFlipped;
         }
     };
+
     // 重写 resizeCanvas 方法：增加 unityInstance 判空
     ARCamera.prototype.resizeCanvas = function() {
         // 优先使用 arCamera 上的 unityInstance 属性
@@ -652,7 +652,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
 
-        ARCamera.prototype.executePendingSetFlipped = function() {
+    // 新增：执行缓存的setFlipped
+    ARCamera.prototype.executePendingSetFlipped = function() {
         if (this.pendingSetFlipped !== undefined) {
             this.setFlipped(this.pendingSetFlipped);
             this.pendingSetFlipped = undefined;
@@ -660,11 +661,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
 
-        // 方式2（备用）：若DOMContentLoaded失效，用load事件（等待所有资源加载完成）
-        // window.addEventListener('load', function() {
-        //     initLoadingBar();
-        //     initializeTracker();
-        // });
+    // ✅ 补全：调用初始化函数
+    initLoadingBar();
+    initializeTracker();
+}); // ✅ 补全：闭合DOMContentLoaded回调函数
+
     </script>
 </body>
 </html>
