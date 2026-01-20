@@ -346,6 +346,34 @@
                 document.getElementById("startARButton").style.display = "block";
             }
 
+                   // 多维度检测鸿蒙系统（含原生/兼容层、微信浏览器）
+       function detectHarmonyOS() {
+           let userAgent = '';
+           try {
+               userAgent = navigator.userAgent.toLowerCase();
+           } catch (e) {
+               console.warn('检测鸿蒙系统失败：', e);
+               return false;
+           }
+           // 检测原生鸿蒙标识
+           const hasHarmonyUA = /harmonyos|harmony/.test(userAgent);
+           // 检测鸿蒙专属API
+           const hasHarmonyAPI = typeof window.harmonyOS !== 'undefined';
+           // 检测微信浏览器+安卓环境（鸿蒙兼容层特征）
+           const isWeChat = /micromessenger/.test(userAgent);
+           const isAndroid = /android/.test(userAgent);
+           const isPureAndroid = /samsung|xiaomi|redmi|vivo|oppo|meizu/.test(userAgent) && !hasHarmonyUA;
+
+           // 鸿蒙系统判断：原生鸿蒙 || 微信+安卓+非纯安卓（鸿蒙兼容层）
+           return hasHarmonyUA || hasHarmonyAPI || (isWeChat && isAndroid && !isPureAndroid);
+       }
+
+       // 最终移动端检测：原有移动端 + 鸿蒙系统（无论原生/兼容层）
+       const isMobileBrowser = (
+           /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+           || detectHarmonyOS() // 补充鸿蒙系统检测
+       );
+
             initialize();
 
             var container = document.querySelector("#unity-container");
