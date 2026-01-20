@@ -453,7 +453,7 @@ async function StartAR() {
         setTimeout(async () => {
             await RequestWebcam();
             console.log("✅ Unity实例创建成功，AR体验启动");
-        }, 500);
+        }, 1000);
 
     } catch (error) {
         console.error("❌ Unity实例创建失败：", error);
