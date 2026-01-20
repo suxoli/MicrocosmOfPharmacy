@@ -428,10 +428,8 @@ async function StartAR() {
             companyName: "NanJingYaoYu",
             productName: "MicrocosmOfPharmacy",
             productVersion: "0.1",
-            // 新增：消除Unity持久化数据路径警告
-            autoSyncPersistentDataPath: true
+            autoSyncPersistentDataPath: true // 消除持久化路径警告
         }, (progress) => {
-            // 进度条更新（区分移动端/PC端）
             const progressFill = document.getElementById('unity-progress-bar-full');
             if (progressFill) {
                 if (isMobileBrowser) {
@@ -442,18 +440,19 @@ async function StartAR() {
             }
         });
 
-        // 关键：将创建好的unityInstance赋值给arCamera
+        // 关键1：将 unityInstance 赋值给 arCamera
         if (window.arCamera) {
             window.arCamera.unityInstance = unityInstance;
+            // 关键2：执行缓存的 setFlipped 操作
+            window.arCamera.executePendingSetFlipped();
         }
 
-        // Unity实例创建后，先标记就绪，再延迟调用摄像头请求（给Unity场景加载时间）
-        unityLoaded(); // 现在函数已定义，不会报错
-        // 延迟500ms请求摄像头，确保Unity场景内的ARCamera对象加载完成
+        unityLoaded(); // 标记 Unity 就绪
+        // 延迟请求摄像头（延长至1秒，确保 Unity 场景完全加载）
         setTimeout(async () => {
             await RequestWebcam();
             console.log("✅ Unity实例创建成功，AR体验启动");
-        }, 1000);
+        }, 1000); // 从 500ms 延长到 1000ms，适配慢加载设备
 
     } catch (error) {
         console.error("❌ Unity实例创建失败：", error);
@@ -477,22 +476,9 @@ async function RequestWebcam() {
         window.webcamStream = await navigator.mediaDevices.getUserMedia(window.WEBCAM_SETTINGS);
         console.log("✅ 摄像头权限已授权");
 
-        // 调用setFlipped前增加多重判空保护
-        if (isUnityReady && window.arCamera && window.arCamera.unityInstance && typeof window.arCamera.unityInstance.SendMessage === 'function') {
-            // 封装setFlipped调用，增加异常捕获
-            try {
-                arCamera.setFlipped(window.WEBCAM_SETTINGS.video.facingMode === 'user');
-            } catch (setFlippedError) {
-                console.warn("⚠️ setFlipped调用暂时失败（Unity对象未就绪）：", setFlippedError);
-                // 降级方案：延迟重试一次，且再次校验引用
-                setTimeout(() => {
-                    if (isUnityReady && window.arCamera && window.arCamera.unityInstance) {
-                        arCamera.setFlipped(window.WEBCAM_SETTINGS.video.facingMode === 'user');
-                    }
-                }, 300);
-            }
-        } else {
-            console.warn("⚠️ Unity实例未就绪，暂不调用setFlipped");
+        // 直接调用 setFlipped（重写后的方法已做容错）
+        if (window.arCamera && typeof window.arCamera.setFlipped === 'function') {
+            window.arCamera.setFlipped(window.WEBCAM_SETTINGS.video.facingMode === 'user');
         }
 
         await StartWebcam(); // 权限成功后启动摄像头
@@ -505,34 +491,20 @@ async function RequestWebcam() {
 }
 
        // 启动摄像头流（增加判空）
-async function StartWebcam() {
-    if (!window.webcamStream) return;
-    // 调用SendMessage前检查Unity实例是否就绪
-    if (!unityInstance || typeof unityInstance.SendMessage !== 'function') {
-        console.warn("⚠️ Unity实例未就绪，暂不通知摄像头启动状态");
-        return;
-    }
-
-    const video = document.querySelector("#webcam-video");
-    if (!video) {
-        console.error("❌ 未找到webcam-video元素");
-        return;
-    }
-
-    video.srcObject = window.webcamStream;
-
-    try {
-        await arCamera.startWebcam(video);
-        unityInstance.SendMessage('ARCamera', 'OnStartWebcamSuccess');
-        console.log("✅ 摄像头启动成功");
-    } catch (err) {
-        console.error("❌ 摄像头启动失败：", err);
-        // 即使启动失败，也确保SendMessage可用
-        if (unityInstance.SendMessage) {
-            unityInstance.SendMessage('ARCamera', 'OnStartWebcamFail');
+    ARCamera.prototype.startWebcam = async function(videoElement) {
+        try {
+            // 执行原始 startWebcam 逻辑
+            await originalStartWebcam.call(this, videoElement);
+            console.log("✅ ARCamera.startWebcam 执行成功");
+        } catch (e) {
+            // 仅捕获 SendMessage 相关异常，其他异常正常抛出
+            if (e.message.includes('SendMessage')) {
+                console.warn("⚠️ startWebcam 跳过 SendMessage 异常：", e);
+            } else {
+                throw e; // 非 SendMessage 异常正常抛出，便于排查
+            }
         }
-    }
-}
+    };
 
         // 加载摄像头列表（增加判空）
         async function LoadWebcams() {
@@ -646,10 +618,47 @@ async function FlipCam() {
 
         // ========== 核心修改：等待DOM完全加载后再执行初始化 ==========
         // 方式1：监听DOMContentLoaded事件（推荐）
-        document.addEventListener('DOMContentLoaded', function() {
-            initLoadingBar(); // 初始化加载栏样式
-            initializeTracker(); // 初始化手部追踪器
-        });
+document.addEventListener('DOMContentLoaded', function() {
+    // 保存原始方法（防止覆盖后丢失逻辑）
+    const originalSetFlipped = ARCamera.prototype.setFlipped;
+    const originalResizeCanvas = ARCamera.prototype.resizeCanvas;
+    const originalStartWebcam = ARCamera.prototype.startWebcam;
+
+    // 重写 setFlipped 方法：增加 unityInstance 判空
+    ARCamera.prototype.setFlipped = function(isFlipped) {
+        this.flipped = isFlipped; // 保留原有属性赋值
+        // 优先使用 arCamera 上的 unityInstance 属性
+        if (this.unityInstance && typeof this.unityInstance.SendMessage === 'function') {
+            this.unityInstance.SendMessage('ARCamera', 'SetFlipped', isFlipped);
+            console.log("✅ setFlipped 执行成功：", isFlipped);
+        } else {
+            console.warn("⚠️ setFlipped 跳过：Unity实例未就绪");
+            // 缓存操作，待 Unity 就绪后执行
+            this.pendingSetFlipped = isFlipped;
+        }
+    };
+    // 重写 resizeCanvas 方法：增加 unityInstance 判空
+    ARCamera.prototype.resizeCanvas = function() {
+        // 优先使用 arCamera 上的 unityInstance 属性
+        if (!this.unityInstance || typeof this.unityInstance.SendMessage !== 'function') {
+            console.warn("⚠️ resizeCanvas 跳过：Unity实例未就绪");
+            return;
+        }
+        // 执行原始 resizeCanvas 逻辑（避免丢失原有功能）
+        try {
+            originalResizeCanvas.call(this);
+        } catch (e) {
+            console.error("⚠️ resizeCanvas 原始逻辑执行失败：", e);
+        }
+    };
+
+        ARCamera.prototype.executePendingSetFlipped = function() {
+        if (this.pendingSetFlipped !== undefined) {
+            this.setFlipped(this.pendingSetFlipped);
+            this.pendingSetFlipped = undefined;
+            console.log("✅ 执行缓存的 setFlipped 操作：", this.pendingSetFlipped);
+        }
+    };
 
         // 方式2（备用）：若DOMContentLoaded失效，用load事件（等待所有资源加载完成）
         // window.addEventListener('load', function() {
