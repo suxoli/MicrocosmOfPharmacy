@@ -5,144 +5,46 @@
     <meta name="viewport" content='width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1.0, user-scalable=no, shrink-to-fit=yes'>
     <title>YYSMART | MicrocosmOfPharmacy</title>
     <link rel="stylesheet" href="TemplateData/style.css">
+    <!-- 可选：添加favicon图标，解决404问题（替换为你的图标路径） -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='90' font-size='90'>🧪</text></svg>" type="image/svg+xml">
 
     <style>
         html {
             height: -webkit-fill-available;
+            box-sizing: border-box;
+        }
+
+        *, *::before, *::after {
+            box-sizing: inherit;
+            margin: 0;
+            padding: 0;
         }
 
         body {
-            margin: 0;
-            padding: 0;
             min-height: 100vh;
             min-height: -webkit-fill-available;
             width: 100vw;
             overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
-        .ctaDiv {
+        /* ========== 通用弹窗容器（统一所有居中弹窗样式） ========== */
+        .modal-container {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             position: absolute;
-            left: 0;
-            right: 0;
-            top: 0;
-            bottom: 0;
-            background: #fffa;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.9);
             z-index: 99;
+            padding: 20px;
         }
+
         /* ========== Unity 加载相关 UI 样式 ========== */
         #unity-container {
             position: absolute;
-            width: 100%;
-            height: 100%;
-        }
-
-        #loading-cover {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #f5f5f8;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        /* 加载栏容器 */
-        #unity-loading-bar {
-            width: 60%;
-            max-width: 400px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background: rgba(255,255,255,0.95);
-            padding: 30px 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
-        }
-
-        #unity-logo {
-            width: 90px;
-            height: 90px;
-            background: url('TemplateData/unity-logo-light.png') center/contain no-repeat;
-            margin-bottom: 20px;
-            transform: scaleX(-1);
-        }
-
-        /* ========== PC端横版进度条（默认） ========== */
-        #unity-progress-bar-empty {
-            width: 100%;
-            height: 14px;
-            border: 1px solid #eee;
-            border-radius: 7px;
-            overflow: hidden;
-            background-color: #f8f8f8;
-            position: relative;
-        }
-
-        #unity-progress-bar-full {
-            height: 100%;
-            background-color: #ff7f24;
-            width: 0%;
-            transition: width 0.2s ease;
-            position: absolute;
-            left: 0;
-            top: 0;
-        }
-
-        /* ========== 移动端竖版进度条 ========== */
-        /* 1. 父容器：强制logo居左、进度条居右，整体水平+垂直居中 */
-        #unity-loading-bar.mobile-progress {
-            display: flex;
-            flex-direction: row; /* 横向排列（左→右） */
-            align-items: center; /* 垂直居中对齐 */
-            justify-content: space-between; /* logo左、进度条右（或用gap控制间距） */
-            gap: 10px; /* logo和进度条的左右间距 */
-            /* 确保父容器占足够宽度，让元素能左右排列 */
-            width: 80%; /* 适配页面宽度，可根据需求调整 */
-            height: 250px;
-            max-width: 100px;
-            /* 页面中整体居中 */
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-
-        /* 2. Logo：取消所有旋转，恢复正常横向显示 */
-        #unity-logo.mobile-progress {
-            width: 60px; /* 适配横向布局的尺寸（可调整） */
-            height: 60px;
-            background: url('TemplateData/unity-logo-light.png') center/contain no-repeat;
-            transform: rotate(0); /* 彻底取消旋转，正常显示 */
-            margin: 0; /* 清空margin */
-        }
-
-        /* 3. 进度条：改为横向进度条（宽长、高短） */
-        #unity-loading-bar.mobile-progress #unity-progress-bar-empty {
-            /* 横向进度条的尺寸：宽长、高短 */
-            width: 20px; /* 进度条长度 */
-            height: 200px; /* 进度条高度 */
-            border-radius: 6px; /* 圆角适配高度 */
-            background-color: #f0f0f0; /* 进度条底色 */
-            transform: rotate(180deg); /* 取消任何旋转 */
-            position: relative;
-        }
-
-        #unity-loading-bar.mobile-progress #unity-progress-bar-full {
-            /* 横向进度条的填充方式：从左到右 */
-            width: 100%; /* 占满进度条高度 */
-            height: 0%; /* 初始高度0，加载时从0%增加到100% */
-            background-color: #ff7f24; /* 进度条颜色 */
-            border-radius: 6px; /* 圆角和容器一致 */
-            position: absolute;
-            left: 0;
-            bottom: 0; /* 从左侧开始填充 */
-            transition: height 0.2s ease; /* 宽度变化动画（替代之前的height） */
+            inset: 0;
         }
 
         #unity-canvas {
@@ -152,37 +54,229 @@
             display: block;
         }
 
-        #unity-warning {
+
+        /* ========== 加载遮罩与加载栏 ========== */
+        #loading-cover {
             position: absolute;
-            top: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: red;
-            color: white;
-            padding: 10px;
-            display: none;
-            z-index: 999;
+            inset: 0;
+            background: #f5f5f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
         }
 
-        /* ========== Unity 加载样式结束 ========== */
+        .loading-bar {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+            gap: 20px;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .loading-bar__logo {
+            width: 90px;
+            height: 90px;
+            background: url('TemplateData/unity-logo-light.png') center/contain no-repeat;
+            transform: scaleX(-1);
+            transition: all 0.3s ease;
+        }
+
+        /* ========== 进度条基础样式 ========== */
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            background-color: #f8f8f8;
+            position: relative;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .progress-bar__fill {
+            position: absolute;
+            inset: 0 0 0 auto;
+            background: linear-gradient(90deg, #ff7f24, #ff9548);
+            width: 0%;
+            transition: width 0.2s ease-in-out;
+        }
+
+        /* ========== 移动端加载栏适配（竖版进度条） ========== */
+        .loading-bar--mobile {
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            max-width: 120px;
+            height: 280px;
+            padding: 20px;
+        }
+
+            .loading-bar--mobile .loading-bar__logo {
+                width: 70px;
+                height: 70px;
+                transform: none;
+                flex-shrink: 0;
+            }
+
+            .loading-bar--mobile .progress-bar {
+                width: 24px;
+                height: 200px;
+                transform: rotate(180deg);
+            }
+
+            .loading-bar--mobile .progress-bar__fill {
+                width: 100%;
+                height: 0%;
+                inset: auto 0 0 0;
+                transition: height 0.2s ease-in-out;
+            }
+
+        /* ========== 警告/错误提示 ========== */
+        #unity-warning {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ff4444;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            display: none;
+            z-index: 999;
+            font-size: 14px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #errorDiv {
+            background: rgba(170, 170, 170, 0.95);
+            color: white;
+        }
+
+        /* ========== 交互元素样式（统一按钮/选择框） ========== */
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            background: #ff7f24;
+            color: white;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            margin: 8px;
+            min-width: 120px;
+        }
+
+            .btn:hover {
+                background: #e6701e;
+            }
+
+        .btn--secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+            .btn--secondary:hover {
+                background: #e0e0e0;
+            }
+
+        .btn--close {
+            position: absolute;
+            top: -12px;
+            right: -12px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #ff4444;
+        }
+
+        .select-cam {
+            padding: 10px 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background: white;
+            font-size: 14px;
+            margin-bottom: 16px;
+            min-width: 200px;
+        }
+
+        /* ========== 功能弹窗样式优化 ========== */
+        #startARDiv p, #errorText {
+            font-size: 16px;
+            line-height: 1.5;
+            text-align: center;
+            margin-bottom: 24px;
+            color: #333;
+            max-width: 500px;
+        }
+
+        #screenshotDiv .modal-content, #confirmUrlDiv .modal-content {
+            position: relative;
+            background-color: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
+            max-width: 90%;
+        }
+
+        #screenshotImg {
+            max-width: 100%;
+            max-height: 80vh;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+
+        #confirmUrlText {
+            font-size: 16px;
+            line-height: 1.5;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        /* ========== 摄像头相关隐藏元素 ========== */
+        #webcam-video {
+            width: 1px;
+            height: 1px;
+            position: absolute;
+            opacity: 0;
+        }
+
+        #video-canvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -99;
+        }
+
     </style>
 </head>
 <body>
 
     <video id="webcam-video" muted autoplay playsinline style="width:1px;position:absolute"></video>
     <canvas id="video-canvas" style="width:100%; height:100%; object-fit:cover; position:absolute; z-index: -99; "></canvas>
-    <div id="startARDiv" class="ctaDiv">
-        <select id="chooseCamSel" style="display: none;" onchange="SelectCam()"></select>
-        <p style="text-align: center; width:60vw;">此增强现实体验需要访问您设备的摄像头</p>
-        <button id="startARButton" onclick="StartAR()" style="display:none">允许访问</button>
+    <div id="startARDiv" class="modal-container">
+        <select id="chooseCamSel" class="select-cam" style="display: none;" onchange="SelectCam()"></select>
+        <p>此增强现实体验需要访问您设备的摄像头</p>
+        <button id="startARButton" class="btn" onclick="StartAR()" style="display:none">允许访问</button>
     </div>
-    <div id="screenshotDiv" style="display: none;" class="ctaDiv">
+    <div id="screenshotDiv" style="display: none;" class="modal-container">
         <div style="position:relative; background-color:white; padding:10px; box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.3), 0 6px 20px 0 rgba(0, 0, 0, 0.25);">
             <img id="screenshotImg" src="" alt="截图" style="width:80vw; height:80vh">
             <button onclick="document.getElementById('screenshotDiv').style.display = 'none';" style="position:absolute; transform:translateY(-100%); right:0; top:0">关闭</button>
         </div>
     </div>
-    <div id="confirmUrlDiv" style="display: none;" class="ctaDiv">
+    <div id="confirmUrlDiv" style="display: none;" class="modal-container">
         <div style="position:relative; background-color:white; padding:10px; box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.3), 0 6px 20px 0 rgba(0, 0, 0, 0.25); width: 80vw; display:flex; flex-direction: column; align-items: center;">
             <p id="confirmUrlText" style="text-align: center; width:80%; overflow: hidden; text-overflow: ellipsis;">您确定要访问 url.com 吗？</p>
             <div>
@@ -191,7 +285,7 @@
             </div>
         </div>
     </div>
-    <div id="errorDiv" class="ctaDiv" style="display: none; background:#aaa">
+    <div id="errorDiv" class="modal-container" style="display: none; background:#aaa">
         <p id="errorText" style="text-align: center; width:60vw; color:white"></p>
     </div>
     <div id="unity-container" class="unity-mobile">
