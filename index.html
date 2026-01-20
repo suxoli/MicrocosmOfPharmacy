@@ -321,6 +321,19 @@
         // 新增：标记Unity是否完全就绪
         let isUnityReady = false;
 
+// ========== 新增：Unity加载完成后的回调函数 ==========
+function unityLoaded() {
+    // 隐藏加载遮罩
+    const loadingCover = document.getElementById('loading-cover');
+    if (loadingCover) {
+        loadingCover.style.display = 'none';
+    }
+    // 标记Unity就绪
+    isUnityReady = true;
+    console.log("✅ Unity已就绪，标记isUnityReady为true");
+}
+
+
         // ========== 初始化加载栏样式（核心修改：增加元素判空 + 容错） ==========
         function initLoadingBar() {
             // 第一步：先获取元素，并判空
@@ -435,7 +448,7 @@ async function StartAR() {
         }
 
         // Unity实例创建后，先标记就绪，再延迟调用摄像头请求（给Unity场景加载时间）
-        unityLoaded(); // 先隐藏加载遮罩，标记Unity就绪
+        unityLoaded(); // 现在函数已定义，不会报错
         // 延迟500ms请求摄像头，确保Unity场景内的ARCamera对象加载完成
         setTimeout(async () => {
             await RequestWebcam();
@@ -633,16 +646,16 @@ async function FlipCam() {
 
         // ========== 核心修改：等待DOM完全加载后再执行初始化 ==========
         // 方式1：监听DOMContentLoaded事件（推荐）
-        //document.addEventListener('DOMContentLoaded', function() {
-        //    initLoadingBar(); // 初始化加载栏样式
-        //    initializeTracker(); // 初始化手部追踪器
-        //});
+        document.addEventListener('DOMContentLoaded', function() {
+            initLoadingBar(); // 初始化加载栏样式
+            initializeTracker(); // 初始化手部追踪器
+        });
 
         // 方式2（备用）：若DOMContentLoaded失效，用load事件（等待所有资源加载完成）
-         window.addEventListener('load', function() {
-             initLoadingBar();
-             initializeTracker();
-         });
+        // window.addEventListener('load', function() {
+        //     initLoadingBar();
+        //     initializeTracker();
+        // });
     </script>
 </body>
 </html>
