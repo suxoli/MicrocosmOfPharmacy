@@ -2,147 +2,48 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content='width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1.0, user-scalable=no, shrink-to-fit=yes'>
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1.0, user-scalable=no, shrink-to-fit=yes">
     <title>YYSMART | MicrocosmOfPharmacy</title>
     <link rel="stylesheet" href="TemplateData/style.css">
 
     <style>
+        /* ========== 全局重置与基础样式 ========== */
         html {
             height: -webkit-fill-available;
+            box-sizing: border-box;
+        }
+
+        *, *::before, *::after {
+            box-sizing: inherit;
+            margin: 0;
+            padding: 0;
         }
 
         body {
-            margin: 0;
-            padding: 0;
             min-height: 100vh;
             min-height: -webkit-fill-available;
             width: 100vw;
             overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
-        .ctaDiv {
+        /* ========== 通用弹窗容器（统一所有居中弹窗样式） ========== */
+        .modal-container {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             position: absolute;
-            left: 0;
-            right: 0;
-            top: 0;
-            bottom: 0;
-            background: #fffa;
+            inset: 0; /* 替代top/right/bottom/left:0，更简洁 */
+            background: rgba(255, 255, 255, 0.9);
             z-index: 99;
+            padding: 20px;
         }
-        /* ========== Unity 加载相关 UI 样式 ========== */
+
+        /* ========== Unity 核心容器 ========== */
         #unity-container {
             position: absolute;
-            width: 100%;
-            height: 100%;
-        }
-
-        #loading-cover {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #f5f5f8;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        /* 加载栏容器 */
-        #unity-loading-bar {
-            width: 60%;
-            max-width: 400px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background: rgba(255,255,255,0.95);
-            padding: 30px 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
-        }
-
-        #unity-logo {
-            width: 90px;
-            height: 90px;
-            background: url('TemplateData/unity-logo-light.png') center/contain no-repeat;
-            margin-bottom: 20px;
-            transform: scaleX(-1);
-        }
-
-        /* ========== PC端横版进度条（默认） ========== */
-        #unity-progress-bar-empty {
-            width: 100%;
-            height: 7px;
-            border: 1px solid #eee;
-            border-radius: 7px;
-            overflow: hidden;
-            background-color: #f8f8f8;
-            position: relative;
-        }
-
-        #unity-progress-bar-full {
-            height: 100%;
-            background-color: #ff7f24;
-            width: 0%;
-            transition: width 0.2s ease;
-            position: absolute;
-            left: 0;
-            top: 0;
-        }
-
-        /* ========== 移动端竖版进度条 ========== */
-        /* 1. 父容器：强制logo居左、进度条居右，整体水平+垂直居中 */
-        #unity-loading-bar.mobile-progress {
-            display: flex;
-            flex-direction: row; /* 横向排列（左→右） */
-            align-items: center; /* 垂直居中对齐 */
-            justify-content: space-between; /* logo左、进度条右（或用gap控制间距） */
-            gap: 10px; /* logo和进度条的左右间距 */
-            /* 确保父容器占足够宽度，让元素能左右排列 */
-            width: 80%; /* 适配页面宽度，可根据需求调整 */
-            height: 250px;
-            max-width: 100px;
-            /* 页面中整体居中 */
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-
-        /* 2. Logo：取消所有旋转，恢复正常横向显示 */
-        #unity-logo.mobile-progress {
-            width: 60px; /* 适配横向布局的尺寸（可调整） */
-            height: 60px;
-            background: url('TemplateData/unity-logo-light.png') center/contain no-repeat;
-            transform: rotate(0); /* 彻底取消旋转，正常显示 */
-            margin: 0; /* 清空margin */
-        }
-
-        /* 3. 进度条：改为横向进度条（宽长、高短） */
-        #unity-loading-bar.mobile-progress #unity-progress-bar-empty {
-            /* 横向进度条的尺寸：宽长、高短 */
-            width: 20px; /* 进度条长度 */
-            height: 200px; /* 进度条高度 */
-            border-radius: 6px; /* 圆角适配高度 */
-            background-color: #f0f0f0; /* 进度条底色 */
-            transform: rotate(180deg); /* 取消任何旋转 */
-            position: relative;
-        }
-
-        #unity-loading-bar.mobile-progress #unity-progress-bar-full {
-            /* 横向进度条的填充方式：从左到右 */
-            width: 100%; /* 占满进度条高度 */
-            height: 0%; /* 初始高度0，加载时从0%增加到100% */
-            background-color: #ff7f24; /* 进度条颜色 */
-            border-radius: 6px; /* 圆角和容器一致 */
-            position: absolute;
-            left: 0;
-            bottom: 0; /* 从左侧开始填充 */
-            transition: height 0.2s ease; /* 宽度变化动画（替代之前的height） */
+            inset: 0;
         }
 
         #unity-canvas {
@@ -152,338 +53,494 @@
             display: block;
         }
 
-        #unity-warning {
+        /* ========== 加载遮罩与加载栏（核心优化） ========== */
+        #loading-cover {
             position: absolute;
-            top: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: red;
-            color: white;
-            padding: 10px;
-            display: none;
-            z-index: 999;
+            inset: 0;
+            background: #f5f5f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
         }
 
-        /* ========== Unity 加载样式结束 ========== */
+        .loading-bar {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px 20px;
+            border-radius: 12px; /* 优化圆角，更现代 */
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12); /* 增强阴影层次感 */
+            gap: 20px; /* 替代margin，更灵活的间距控制 */
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .loading-bar__logo {
+            width: 90px;
+            height: 90px;
+            background: url('TemplateData/unity-logo-light.png') center/contain no-repeat;
+            transform: scaleX(-1);
+            transition: all 0.3s ease; /* 增加过渡动画 */
+        }
+
+        /* ========== 进度条基础样式 ========== */
+        .progress-bar {
+            width: 100%;
+            height: 8px; /* 略微加高，提升可视性 */
+            border-radius: 4px;
+            overflow: hidden;
+            background-color: #f8f8f8;
+            position: relative;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05); /* 内阴影增强质感 */
+        }
+
+        .progress-bar__fill {
+            position: absolute;
+            inset: 0 0 0 auto; /* 仅右侧自适应，左侧固定 */
+            background: linear-gradient(90deg, #ff7f24, #ff9548); /* 渐变增强视觉 */
+            width: 0%;
+            transition: width 0.2s ease-in-out; /* 更顺滑的动画 */
+        }
+
+        /* ========== 移动端加载栏适配（竖版进度条） ========== */
+        .loading-bar--mobile {
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            max-width: 120px; /* 修复原max-width冲突问题 */
+            height: 280px;
+            padding: 20px;
+        }
+
+            .loading-bar--mobile .loading-bar__logo {
+                width: 70px;
+                height: 70px;
+                transform: none; /* 取消翻转，恢复正常 */
+                flex-shrink: 0; /* 防止logo被压缩 */
+            }
+
+            .loading-bar--mobile .progress-bar {
+                width: 24px;
+                height: 200px;
+                transform: rotate(180deg);
+            }
+
+            .loading-bar--mobile .progress-bar__fill {
+                width: 100%;
+                height: 0%;
+                inset: auto 0 0 0; /* 从下往上填充 */
+                transition: height 0.2s ease-in-out;
+            }
+
+        /* ========== 警告/错误提示 ========== */
+        #unity-warning {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ff4444;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            display: none;
+            z-index: 999;
+            font-size: 14px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #errorDiv {
+            background: rgba(170, 170, 170, 0.95); /* 优化透明度，提升可读性 */
+            color: white;
+        }
+
+        /* ========== 交互元素样式（统一按钮/选择框） ========== */
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            background: #ff7f24;
+            color: white;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            margin: 8px;
+            min-width: 120px;
+        }
+
+            .btn:hover {
+                background: #e6701e;
+            }
+
+        .btn--secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+            .btn--secondary:hover {
+                background: #e0e0e0;
+            }
+
+        .btn--close {
+            position: absolute;
+            top: -12px;
+            right: -12px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #ff4444;
+        }
+
+        .select-cam {
+            padding: 10px 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background: white;
+            font-size: 14px;
+            margin-bottom: 16px;
+            min-width: 200px;
+        }
+
+        /* ========== 功能弹窗样式优化 ========== */
+        #startARDiv p, #errorText {
+            font-size: 16px;
+            line-height: 1.5; /* 优化行高，提升可读性 */
+            text-align: center;
+            margin-bottom: 24px;
+            color: #333;
+            max-width: 500px;
+        }
+
+        #screenshotDiv .modal-content, #confirmUrlDiv .modal-content {
+            position: relative;
+            background-color: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
+            max-width: 90%;
+        }
+
+        #screenshotImg {
+            max-width: 100%;
+            max-height: 80vh;
+            object-fit: contain; /* 防止图片变形 */
+            border-radius: 8px;
+        }
+
+        #confirmUrlText {
+            font-size: 16px;
+            line-height: 1.5;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        /* ========== 摄像头相关隐藏元素 ========== */
+        #webcam-video {
+            width: 1px;
+            height: 1px;
+            position: absolute;
+            opacity: 0; /* 彻底隐藏，避免视觉干扰 */
+        }
+
+        #video-canvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -99;
+        }
     </style>
 </head>
 <body>
+    <!-- 摄像头视频容器（隐藏） -->
+    <video id="webcam-video" muted autoplay playsinline></video>
+    <canvas id="video-canvas"></canvas>
 
-    <video id="webcam-video" muted autoplay playsinline style="width:1px;position:absolute"></video>
-    <canvas id="video-canvas" style="width:100%; height:100%; object-fit:cover; position:absolute; z-index: -99; "></canvas>
-    <div id="startARDiv" class="ctaDiv">
-        <select id="chooseCamSel" style="display: none;" onchange="SelectCam()"></select>
-        <p style="text-align: center; width:60vw;">此增强现实体验需要访问您设备的摄像头</p>
-        <button id="startARButton" onclick="StartAR()" style="display:none">允许访问</button>
+    <!-- AR启动弹窗 -->
+    <div id="startARDiv" class="modal-container">
+        <select id="chooseCamSel" class="select-cam" style="display: none;" onchange="SelectCam()"></select>
+        <p>此增强现实体验需要访问您设备的摄像头</p>
+        <button id="startARButton" class="btn" onclick="StartAR()" style="display:none">允许访问</button>
     </div>
-    <div id="screenshotDiv" style="display: none;" class="ctaDiv">
-        <div style="position:relative; background-color:white; padding:10px; box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.3), 0 6px 20px 0 rgba(0, 0, 0, 0.25);">
-            <img id="screenshotImg" src="" alt="截图" style="width:80vw; height:80vh">
-            <button onclick="document.getElementById('screenshotDiv').style.display = 'none';" style="position:absolute; transform:translateY(-100%); right:0; top:0">关闭</button>
+
+    <!-- 截图预览弹窗 -->
+    <div id="screenshotDiv" class="modal-container" style="display: none;">
+        <div class="modal-content">
+            <img id="screenshotImg" src="" alt="截图">
+            <button class="btn btn--close" onclick="document.getElementById('screenshotDiv').style.display = 'none'">×</button>
         </div>
     </div>
-    <div id="confirmUrlDiv" style="display: none;" class="ctaDiv">
-        <div style="position:relative; background-color:white; padding:10px; box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.3), 0 6px 20px 0 rgba(0, 0, 0, 0.25); width: 80vw; display:flex; flex-direction: column; align-items: center;">
-            <p id="confirmUrlText" style="text-align: center; width:80%; overflow: hidden; text-overflow: ellipsis;">您确定要访问 url.com 吗？</p>
+
+    <!-- URL确认弹窗 -->
+    <div id="confirmUrlDiv" class="modal-container" style="display: none;">
+        <div class="modal-content">
+            <p id="confirmUrlText" style="text-align: center;">您确定要访问 url.com 吗？</p>
             <div>
-                <button onclick="window.open(newUrlString, '_blank').focus(); document.getElementById('confirmUrlDiv').style.display = 'none'">访问网站</button>
-                <button onclick="document.getElementById('confirmUrlDiv').style.display = 'none'">返回</button>
+                <button class="btn" onclick="window.open(newUrlString, '_blank').focus(); document.getElementById('confirmUrlDiv').style.display = 'none'">访问网站</button>
+                <button class="btn btn--secondary" onclick="document.getElementById('confirmUrlDiv').style.display = 'none'">返回</button>
             </div>
         </div>
     </div>
-    <div id="errorDiv" class="ctaDiv" style="display: none; background:#aaa">
-        <p id="errorText" style="text-align: center; width:60vw; color:white"></p>
+
+    <!-- 错误提示弹窗 -->
+    <div id="errorDiv" class="modal-container" style="display: none;">
+        <p id="errorText"></p>
     </div>
-    <div id="unity-container" class="unity-mobile">
-        <canvas id="unity-canvas" style="width: 100%; height: 100%; background: #0000; z-index: -98"></canvas>
-        <div id="unity-loading-bar">
-            <div id="unity-logo"></div>
-            <div id="unity-progress-bar-empty">
-                <div id="unity-progress-bar-full"></div>
+
+    <!-- Unity核心容器 -->
+    <div id="unity-container">
+        <canvas id="unity-canvas" style="z-index: -98"></canvas>
+        <div id="loading-cover">
+            <div id="unity-loading-bar" class="loading-bar">
+                <div id="unity-logo" class="loading-bar__logo"></div>
+                <div class="progress-bar">
+                    <div class="progress-bar__fill" id="unity-progress-bar-full"></div>
+                </div>
             </div>
         </div>
-        <canvas id="video-canvas"></canvas>
     </div>
+
+    <!-- 脚本引入 -->
     <script src="arcamera.js" type="text/javascript"></script>
     <script src="htracker.js" type="text/javascript"></script>
     <script src="Build/MicrocosmOfPharmacy.loader.js"></script>
+
     <script>
-            var initialize = async() =>{
-                var unityCanvas = document.querySelector("#unity-canvas");
-                var videoCanvas = document.querySelector("#video-canvas");
-                window.arCamera = new ARCamera(unityCanvas, videoCanvas);
-                window.hTracker = new HandTracker(arCamera);
-                try{
-                    var numHands = 2; //<--设置最大检测手数
+        // 全局变量定义（统一前置）
+        let unityInstance = null;
+        const isMobileBrowser = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-                    //initialize using mediapipe CDN
-                    // await window.hTracker.initialize(
-                    //     "./opencv.js",
-                    //     "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.6",
-                    //     "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.6/wasm",
-                    //     "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task",
-                    //     numHands,
-                    //     0.1, //检测置信度
-                    //     0.1, //存在置信度
-                    //     0.1, //跟踪置信度
-                    // );
-
-                    //本地初始化
-                    await window.hTracker.initialize(
-                        "./opencv.js",
-                        "./mediapipe/tasks-vision@0.10.6.js",
-                        "./mediapipe/wasm",
-                        "./mediapipe/hand_landmarker.task",
-                        numHands,
-                        0.3, //检测置信度
-                        0.3, //存在置信度
-                        0.3, //跟踪置信度
-                    );
-
-                    console.log("手部追踪器初始化完成！");
-                }
-                catch (error){
-                    console.error("手部追踪器初始化失败。是否缺少 opencv.js？ " + error);
-                    ShowError("体验初始化失败。");
-                    return;
-                }
-
-                await LoadWebcams();
-                document.getElementById("startARButton").style.display = "block";
-            }
-
-            initialize();
-
-            var container = document.querySelector("#unity-container");
-            var canvas = document.querySelector("#unity-canvas");
-            var loadingBar = document.querySelector("#unity-loading-bar");
-            var progressBarFull = document.querySelector("#unity-progress-bar-full");
-
-        // 初始化进度条方向（仅控制横竖，无旋转）
+        // ========== 初始化加载栏样式 ==========
         function initLoadingBar() {
+            const loadingBar = document.getElementById('unity-loading-bar');
+            const loadingLogo = document.getElementById('unity-logo');
+
             if (isMobileBrowser) {
-                loadingBar.classList.add("mobile-progress");
-                loadingLogo.classList.add("mobile-progress");
-                console.log("📱 移动端/鸿蒙系统：进度条为竖版，Logo已正位");
+                // 移动端：竖版进度条
+                loadingBar.classList.add('loading-bar--mobile');
+                // 补充移动端meta（避免重复添加）
+                if (!document.querySelector('meta[name="viewport"][content*="user-scalable=no"]')) {
+                    const meta = document.createElement('meta');
+                    meta.name = 'viewport';
+                    meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no';
+                    document.head.appendChild(meta);
+                }
+                console.log("📱 移动端：进度条为竖版，Logo已正位");
             } else {
-                loadingBar.classList.remove("mobile-progress");
+                // PC端：横版进度条
+                loadingBar.classList.remove('loading-bar--mobile');
                 console.log("💻 PC端：进度条为横版，Logo已正位");
             }
         }
 
+        // ========== Unity加载完成回调 ==========
         function unityLoaded() {
-            document.querySelector("#loading-cover").style.display = "none";
+            document.getElementById('loading-cover').style.display = 'none';
         }
 
+        // ========== 手部追踪器初始化 ==========
+        async function initializeTracker() {
+            const unityCanvas = document.querySelector("#unity-canvas");
+            const videoCanvas = document.querySelector("#video-canvas");
 
-            function StartAR() {
-                canvas.style.width = window.innerWidth + "px";
-                canvas.style.height = window.innerHeight + "px";
+            window.arCamera = new ARCamera(unityCanvas, videoCanvas);
+            window.hTracker = new HandTracker(arCamera);
 
-                document.getElementById("startARDiv").style.display = "none";
-                createUnityInstance(document.querySelector("#unity-canvas"), {
-                    dataUrl: "Build/MicrocosmOfPharmacy.data.unityweb",
-                    frameworkUrl: "Build/MicrocosmOfPharmacy.framework.js.unityweb",
-                    codeUrl: "Build/MicrocosmOfPharmacy.wasm.unityweb",
+            try {
+                const numHands = 1;
+                // 本地初始化（参数优化）
+                await window.hTracker.initialize(
+                    "./opencv.js",
+                    "./mediapipe/tasks-vision@0.10.6.js",
+                    "./mediapipe/wasm",
+                    "./mediapipe/hand_landmarker.task",
+                    numHands,
+                    0.3, // 检测置信度
+                    0.3, // 存在置信度
+                    0.3  // 跟踪置信度
+                );
+                console.log("✅ 手部追踪器初始化完成！");
+            } catch (error) {
+                console.error("❌ 手部追踪器初始化失败：", error);
+                ShowError("体验初始化失败，请检查依赖文件是否完整。");
+                return;
+            }
+
+            await LoadWebcams();
+            document.getElementById("startARButton").style.display = "block";
+        }
+
+        // ========== AR启动核心逻辑（清理重复代码） ==========
+        async function StartAR() {
+            // 隐藏启动弹窗
+            document.getElementById("startARDiv").style.display = "none";
+
+            // 创建Unity实例（统一唯一入口）
+            try {
+                unityInstance = await createUnityInstance(document.querySelector("#unity-canvas"), {
+                    dataUrl: `Build/MicrocosmOfPharmacy.data.unityweb`,
+                    frameworkUrl: `Build/MicrocosmOfPharmacy.framework.js.unityweb`,
+                        codeUrl: `Build/MicrocosmOfPharmacy.wasm.unityweb`,
                     streamingAssetsUrl: "StreamingAssets",
                     companyName: "NanJingYaoYu",
                     productName: "MicrocosmOfPharmacy",
-                    productVersion: "0.1",
-                    //webglContextAttributes: { "preserveDrawingBuffer": true },
-                    // matchWebGLToCanvasSize: false, // 取消注释可单独控制 WebGL 画布渲染尺寸和 DOM 元素尺寸
-                    // devicePixelRatio: 1, // 取消注释可在高 DPI 显示器上覆盖低 DPI 渲染
-                    },
-                    (progress) => {
-                        progressBarFull.style.width = 100 * progress + "%";
+                    productVersion: "0.1"
+                }, (progress) => {
+                    // 进度条更新（区分移动端/PC端）
+                    const progressFill = document.getElementById('unity-progress-bar-full');
+                    if (isMobileBrowser) {
+                        progressFill.style.height = `${100 * progress}%`;
+                    } else {
+                        progressFill.style.width = `${100 * progress}%`;
                     }
-                ).then((unityInstance) => {
-                    window.unityInstance = unityInstance;
-                    RequestWebcam();
-
-                    loadingBar.style.display = "none";
                 });
-                loadingBar.style.display = "block";
+
+                // Unity实例创建成功后请求摄像头
+                await RequestWebcam();
+                unityLoaded(); // 隐藏加载遮罩
+                console.log("✅ Unity实例创建成功，AR体验启动");
+            } catch (error) {
+                console.error("❌ Unity实例创建失败：", error);
+                ShowError("AR体验启动失败，请刷新页面重试。");
             }
-            //在此设置摄像头朝向 ('environment' 后置, 'user' 前置, '' 自动)
+        }
+
+        // ========== 摄像头相关逻辑 ==========
+        // 摄像头配置（统一管理）
 		window.unityFacingMode = "user"
+        window.WEBCAM_SETTINGS = {
+            video: { facingMode: window.unityFacingMode },
+            audio: false
+        };
+        window.requestingForPermissions = false;
 
-            window.WEBCAM_SETTINGS = {
-                video: {
-                    facingMode: unityFacingMode,
-                },
-                audio: false
-            };
-
-            window.requestingForPermissions = false;
-            async function RequestWebcam(){
-                window.requestingForPermissions = true;
-                try{
-                    window.webcamStream = await navigator.mediaDevices.getUserMedia(window.WEBCAM_SETTINGS);
-                    arCamera.setFlipped(window.WEBCAM_SETTINGS.video.facingMode == 'user');
-
-                    console.log("摄像头访问已授权");
-                    requestingForPermissions = false;
-                }
-                catch (err) {
-                    //用户拒绝摄像头权限 - 显示错误面板
-                    console.error("获取媒体设备失败 - " , err);
-                    ShowError("体验启动失败。摄像头权限被拒绝");
-                    window.requestingForPermissions = false;
-                }
+        // 请求摄像头权限
+        async function RequestWebcam() {
+            window.requestingForPermissions = true;
+            try {
+                window.webcamStream = await navigator.mediaDevices.getUserMedia(window.WEBCAM_SETTINGS);
+                arCamera.setFlipped(window.WEBCAM_SETTINGS.video.facingMode === 'user');
+                console.log("✅ 摄像头权限已授权");
+                await StartWebcam(); // 权限成功后启动摄像头
+            } catch (err) {
+                console.error("❌ 获取摄像头权限失败：", err);
+                ShowError("体验启动失败，摄像头权限被拒绝。");
+            } finally {
+                window.requestingForPermissions = false;
             }
+        }
 
-            async function StartWebcam(){
-                console.log("启动摄像头")
+        // 启动摄像头流
+        async function StartWebcam() {
+            if (!window.webcamStream) return;
 
-                while (window.requestingForPermissions) {
-                    // 等待权限请求完成
-                    console.log("等待权限授权...");
-                    await new Promise(resolve => setTimeout(resolve, 100)); // 可调整延迟时间
-                }
+            const video = document.querySelector("#webcam-video");
+            video.srcObject = window.webcamStream;
 
-                console.log("已获取权限");
-
-                if(window.webcamStream)
-                {
-                    const video = document.querySelector("#webcam-video");
-                    video.srcObject = webcamStream;
-                    try {
-                        await arCamera.startWebcam(video);
-                        console.log("摄像头启动成功");
-
-                        window.unityInstance.SendMessage('ARCamera', 'OnStartWebcamSuccess');
-                    }
-                    catch(err){
-                        console.error("摄像头启动失败 - ", err);
-                        window.unityInstance.SendMessage('ARCamera', 'OnStartWebcamFail');
-                    }
-                }
-                else{
-                    console.error("摄像头启动失败 - 权限未授权");
-                    window.unityInstance.SendMessage('ARCamera', 'OnStartWebcamFail');
-                }
+            try {
+                await arCamera.startWebcam(video);
+                unityInstance.SendMessage('ARCamera', 'OnStartWebcamSuccess');
+                console.log("✅ 摄像头启动成功");
+            } catch (err) {
+                console.error("❌ 摄像头启动失败：", err);
+                unityInstance.SendMessage('ARCamera', 'OnStartWebcamFail');
             }
-            async function LoadWebcams(){
-                let camDevices = [];
-                // let backCams = [];
-                let devices = await navigator.mediaDevices.enumerateDevices();
-                var ctr = 0;
-                devices.forEach(mediaDevice => {
-                    if (mediaDevice.kind === 'videoinput') {
+        }
 
-                        if(window.unityFacingMode == 'environment' && !mediaDevice.label.includes('facing front')){
-                            //仅后置摄像头
-                            camDevices.push(mediaDevice);
-                        }
-                        else if(window.unityFacingMode == 'user' && mediaDevice.label.includes('facing front')){
-                            //仅前置摄像头
-                            camDevices.push(mediaDevice);
-                        }
-                        else{
-                            //前后置都包含
-                            camDevices.push(mediaDevice);
-                        }
+        // 加载摄像头列表
+        async function LoadWebcams() {
+            try {
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const camDevices = devices.filter(device => device.kind === 'videoinput');
+                const select = document.getElementById("chooseCamSel");
 
-                        ctr++;
-                    }
-                });
-                var select = document.getElementById("chooseCamSel");
+                if (camDevices.length === 0) {
+                    ShowError("未检测到可用摄像头设备。");
+                    return;
+                }
+
+                // 渲染摄像头选项
                 select.style.display = "block";
-                var count = 0;
-                camDevices.forEach(mediaDevice => {
+                camDevices.forEach((device, index) => {
                     const option = document.createElement('option');
-                    option.value = mediaDevice.deviceId;
-                    let label = `摄像头 ${count}`;
-                    if (mediaDevice.label) {
-                        label = mediaDevice.label
-                    }
-                    const textNode = document.createTextNode(label);
-                    option.appendChild(textNode);
+                    option.value = device.deviceId;
+                    option.textContent = device.label || `摄像头 ${index + 1}`; // 优化命名（从1开始）
                     select.appendChild(option);
-                    count++;
                 });
-                // iTracker.WEBCAM_NAME = select.options[select.selectedIndex].innerHTML;
+            } catch (error) {
+                console.error("❌ 加载摄像头列表失败：", error);
             }
-            function SelectCam(){
-                var select = document.getElementById("chooseCamSel");
-                const deviceId = select.value;
-                window.WEBCAM_SETTINGS.video['deviceId'] = deviceId;
-                //console.log(window.WEBCAM_SETTINGS);
-                // iTracker.WEBCAM_NAME = select.options[select.selectedIndex].innerHTML;
-            }
+        }
 
-            async function FlipCam(){
+        // 切换摄像头
+        function SelectCam() {
+            const select = document.getElementById("chooseCamSel");
+            window.WEBCAM_SETTINGS.video.deviceId = select.value;
+        }
+
+        // 翻转摄像头（前置/后置）
+        async function FlipCam() {
+            try {
                 arCamera.stopWebcam();
                 window.WEBCAM_SETTINGS.video.deviceId = '';
 
-                if(window.WEBCAM_SETTINGS.video.facingMode == 'user'){
+                // 切换朝向
+                if (window.WEBCAM_SETTINGS.video.facingMode === 'user') {
                     window.WEBCAM_SETTINGS.video.facingMode = 'environment';
                     arCamera.setFlipped(false);
-                }
-                else{
+                } else {
                     window.WEBCAM_SETTINGS.video.facingMode = 'user';
                     arCamera.setFlipped(true);
                 }
+
+                // 重新请求摄像头流
                 window.webcamStream = await navigator.mediaDevices.getUserMedia(window.WEBCAM_SETTINGS);
-
                 const video = document.querySelector("#webcam-video");
-                video.srcObject = webcamStream;
-
+                video.srcObject = window.webcamStream;
                 await arCamera.startWebcam(video);
+                console.log("✅ 摄像头已翻转");
+            } catch (error) {
+                console.error("❌ 翻转摄像头失败：", error);
+                ShowError("切换摄像头失败，请重试。");
             }
-
-            function ShowError(error){
-                document.getElementById("errorDiv").style.display = "flex";
-                document.getElementById("errorText").innerHTML = error;
-            }
-
-            function ShowScreenshot(dataUrl){
-                document.getElementById("screenshotDiv").style.display = "flex";
-                document.getElementById("screenshotImg").src = dataUrl;
-                document.getElementById("screenshotImg").style.width = "80vw";
-                document.getElementById("screenshotImg").style.height = 80 / window.innerWidth * window.innerHeight + "vw";
-            }
-
-            function ShowConfirmUrl(url){
-                document.getElementById("confirmUrlDiv").style.display = "flex";
-                window.newUrlString = url;
-                document.getElementById("confirmUrlText").innerText = "您确定要访问 " + url;
-            }
-
-            window.hTracker_GLOBALS = {
-                //在此放置全局设置
-            }
-        // 先初始化加载栏（Logo正位+进度条横竖）
-        initLoadingBar();
-
-        if (isMobileBrowser) {
-            var meta = document.createElement('meta');
-            meta.name = 'viewport';
-            meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no';
-            document.head.appendChild(meta);
         }
 
-        var script = document.createElement("script");
-        script.src = loaderUrl;
-        script.onload = () => {
-            createUnityInstance(document.querySelector("#unity-canvas"), config, (progress) => {
-                if (isMobileBrowser) {
-                    // 移动端竖条：高度从0→100%（从下往上填充）
-                    progressBarFull.style.height = 100 * progress + "%";
-                } else {
-                    // PC端横条：宽度从0→100%（从左往右填充）
-                    progressBarFull.style.width = 100 * progress + "%";
-                }
-            }).then((instance) => {
-                unityInstance = instance;
-                unityLoaded();
-            }).catch((message) => {
-                unityShowBanner(message, 'error');
-                console.error("❌ Unity实例创建失败:", message);
-            });
-        };
-        document.body.appendChild(script);
+        // ========== 通用工具函数 ==========
+        function ShowError(error) {
+            const errorDiv = document.getElementById("errorDiv");
+            const errorText = document.getElementById("errorText");
+            errorText.textContent = error;
+            errorDiv.style.display = "flex";
+        }
 
+        function ShowScreenshot(dataUrl) {
+            const screenshotDiv = document.getElementById("screenshotDiv");
+            const screenshotImg = document.getElementById("screenshotImg");
+            screenshotImg.src = dataUrl;
+            screenshotDiv.style.display = "flex";
+        }
+
+        function ShowConfirmUrl(url) {
+            const confirmDiv = document.getElementById("confirmUrlDiv");
+            const confirmText = document.getElementById("confirmUrlText");
+            window.newUrlString = url;
+            confirmText.textContent = `您确定要访问 ${url} 吗？`;
+            confirmDiv.style.display = "flex";
+        }
+
+        // 全局配置
+        window.hTracker_GLOBALS = {};
+
+        // ========== 初始化执行 ==========
+        initLoadingBar(); // 初始化加载栏样式
+        initializeTracker(); // 初始化手部追踪器
     </script>
 </body>
 </html>
