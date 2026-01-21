@@ -135,14 +135,13 @@
             .loading-bar--mobile .progress-bar {
                 width: 24px;
                 height: 200px;
-                transform: rotate(180deg);
             }
 
             .loading-bar--mobile .progress-bar__fill {
                 width: 100%;
                 height: 0%;
                 inset: auto 0 0 0;
-                transition: height 0.2s ease-in-out;
+                transition: width 0.2s ease-in-out;
             }
 
         /* ========== 警告/错误提示 ========== */
@@ -459,13 +458,7 @@
 
                         const progressFill = document.getElementById("progress-bar-full");
 
-                        if (isMobileBrowser) {
-                            // 移动端：更新竖版进度条的高度
-                            progressFill.style.height = (100 * progress) + "%";
-                        } else {
-                            // PC端：更新横版进度条的宽度
-                            progressFill.style.width = (100 * progress) + "%";
-                        }
+                        progressFill.style.width = (100 * progress) + "%";
 
                     }
                 ).then((instance) => {
