@@ -79,6 +79,20 @@
     <script>
         var orientation = window.orientation;
 
+        // 增加栈大小（部分浏览器支持）
+        Error.stackTraceLimit = 100;
+
+        // 监听 WebGL 上下文丢失
+        window.addEventListener('webglcontextlost', (event) => {
+            console.log('WebGL 上下文丢失');
+            event.preventDefault();
+        });
+
+        window.addEventListener('webglcontextrestored', () => {
+            console.log('WebGL 上下文恢复');
+            location.reload();
+        });
+
         // 获取第一个问号后的所有内容（包括后续的所有问号和参数）
         function getRawQueryString() {
             const fullUrl = window.location.href;

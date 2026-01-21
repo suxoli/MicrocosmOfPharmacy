@@ -460,7 +460,7 @@
                 while (window.requestingForPermissions) {
                     // 等待权限请求完成
                     console.log("等待权限授权...");
-                    await new Promise(resolve => setTimeout(resolve, 100)); // 可调整延迟时间
+                    await new Promise(resolve => setTimeout(resolve, 1000)); // 可调整延迟时间
                 }
 
                 console.log("已获取权限");
