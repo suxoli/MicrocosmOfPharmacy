@@ -372,7 +372,9 @@
        const isMobileBrowser = (
            /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
            || detectHarmonyOS() // 补充鸿蒙系统检测
-       );
+        );
+
+        let mobileStatusStr = isMobileBrowser ? "true" : "false";
 
             initialize();
 
@@ -393,8 +395,29 @@
             }
         }
 
+        function sendMobileStatusToUnity() {
+            if (!unityInstance) return;
+            if (sendRetryCount >= maxRetryCount) {
+                unityShowBanner("未找到ARManager或ReceiveMobileStatus方法", "error");
+                return;
+            }
+            try {
+                unityInstance.SendMessage("ARManager", "ReceiveMobileStatus", mobileStatusStr);
+
+                console.log(iosStatusStr);
+
+                console.log("✅ 移动端状态发送成功");
+            } catch (e) {
+                sendRetryCount++;
+                console.error(`❌ 第${sendRetryCount}次发送失败：`, e.message);
+                setTimeout(sendMobileStatusToUnity, 1000);
+            }
+        }
+
+
         function unityLoaded() {
             document.querySelector("#loading-cover").style.display = "none";
+            sendMobileStatusToUnity();
         }
 
 
