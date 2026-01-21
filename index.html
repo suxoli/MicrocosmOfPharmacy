@@ -54,6 +54,15 @@
             display: block;
         }
 
+        #unity-progress-bar-full {
+            height: 100%;
+            background-color: #ff7f24;
+            width: 0%;
+            transition: width 0.2s ease;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
 
         /* ========== 加载遮罩与加载栏 ========== */
         #loading-cover {
@@ -98,13 +107,11 @@
         }
 
         .progress-bar__fill {
-            height: 100%;
-            background-color: #ff7f24;
-            width: 0%;
-            transition: width 0.2s ease;
             position: absolute;
-            left: 0;
-            top: 0;
+            inset: 0 0 0 auto;
+            background: linear-gradient(90deg, #ff7f24, #ff9548);
+            width: 100%;
+            transition: width 0.2s ease-in-out;
         }
 
         /* ========== 移动端加载栏适配（竖版进度条） ========== */
