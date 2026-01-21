@@ -451,21 +451,6 @@
                     // devicePixelRatio: 1, // 取消注释可在高 DPI 显示器上覆盖低 DPI 渲染
                     autoSyncPersistentDataPath: true,
                     },
-
-        // 添加内存配置
-        webglContextAttributes: {
-            preserveDrawingBuffer: false,
-                powerPreference: "low-power", // 使用低功耗模式
-                    alpha: true,
-                        antialias: false // 关闭抗锯齿节省内存
-        },
-        // 减少Unity内存分配
-        unityLoaderConfig: {
-            totalMemory: 64 * 1024 * 1024, // 64MB
-                totalStack: 1 * 1024 * 1024,   // 1MB
-                    dynamicHeapResize: true        // 允许动态调整堆大小
-        },
-
                     (progress) => {
 
                         const progressFill = document.getElementById("progress-bar-full");
