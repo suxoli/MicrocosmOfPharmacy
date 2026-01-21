@@ -451,6 +451,21 @@
                     // devicePixelRatio: 1, // 取消注释可在高 DPI 显示器上覆盖低 DPI 渲染
                     autoSyncPersistentDataPath: true,
                     },
+
+        // 添加内存配置
+        webglContextAttributes: {
+            preserveDrawingBuffer: false,
+                powerPreference: "low-power", // 使用低功耗模式
+                    alpha: true,
+                        antialias: false // 关闭抗锯齿节省内存
+        },
+        // 减少Unity内存分配
+        unityLoaderConfig: {
+            totalMemory: 64 * 1024 * 1024, // 64MB
+                totalStack: 1 * 1024 * 1024,   // 1MB
+                    dynamicHeapResize: true        // 允许动态调整堆大小
+        },
+
                     (progress) => {
 
                         const progressFill = document.getElementById("progress-bar-full");
@@ -472,26 +487,6 @@
             window.WEBCAM_SETTINGS = {
                 video: {
                     facingMode: unityFacingMode,
-                    // 添加缩放和分辨率控制
-                    width: {
-                        min: 640,
-                        ideal: 1280,
-                        max: 1920
-                    },
-                    height: {
-                        min: 480,
-                        ideal: 720,
-                        max: 1080
-                    },
-                    // 尝试添加这些约束
-                    aspectRatio: { ideal: 1.7777777778 }, // 16:9
-                    frameRate: { ideal: 30, max: 60 },
-                    // 尝试指定使用广角镜头
-                    advanced: [
-                        { width: 1280, height: 720 },  // 高清
-                        { width: 640, height: 480 },   // 标清
-                        { facingMode: { exact: "environment" } }
-                    ]
                 },
                 audio: false
             };
