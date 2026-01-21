@@ -433,8 +433,6 @@
             }
         }
 
-
-
             function StartAR() {
                 canvas.style.width = window.innerWidth + "px";
                 canvas.style.height = window.innerHeight + "px";
@@ -484,16 +482,7 @@
                         min: 480,
                         ideal: 720,
                         max: 1080
-                    },
-                    // 尝试添加这些约束
-                    aspectRatio: { ideal: 1.7777777778 }, // 16:9
-                    frameRate: { ideal: 30, max: 60 },
-                    // 尝试指定使用广角镜头
-                    advanced: [
-                        { width: 1280, height: 720 },  // 高清
-                        { width: 640, height: 480 },   // 标清
-                        { facingMode: { exact: "environment" } }
-                    ]
+                    }
                 },
                 audio: false
             };
