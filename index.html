@@ -439,9 +439,9 @@
 
                 document.getElementById("startARDiv").style.display = "none";
                 createUnityInstance(document.querySelector("#unity-canvas"), {
-                    dataUrl: "Build/MicrocosmOfPharmacy.data.unityweb",
-                    frameworkUrl: "Build/MicrocosmOfPharmacy.framework.js.unityweb",
-                    codeUrl: "Build/MicrocosmOfPharmacy.wasm.unityweb",
+                    dataUrl: "Build/MicrocosmOfPharmacy.data",
+                    frameworkUrl: "Build/MicrocosmOfPharmacy.framework.js",
+                    codeUrl: "Build/MicrocosmOfPharmacy.wasm",
                     streamingAssetsUrl: "StreamingAssets",
                     companyName: "NanJingYaoYu",
                     productName: "MicrocosmOfPharmacy",
@@ -472,7 +472,7 @@
             window.WEBCAM_SETTINGS = {
                 video: {
                     facingMode: unityFacingMode,
-                    //添加缩放控制
+                    // 添加缩放和分辨率控制
                     width: {
                         min: 640,
                         ideal: 1280,
@@ -482,7 +482,16 @@
                         min: 480,
                         ideal: 720,
                         max: 1080
-                    }
+                    },
+                    // 尝试添加这些约束
+                    aspectRatio: { ideal: 1.7777777778 }, // 16:9
+                    frameRate: { ideal: 30, max: 60 },
+                    // 尝试指定使用广角镜头
+                    advanced: [
+                        { width: 1280, height: 720 },  // 高清
+                        { width: 640, height: 480 },   // 标清
+                        { facingMode: { exact: "environment" } }
+                    ]
                 },
                 audio: false
             };
