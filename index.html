@@ -102,6 +102,7 @@
             inset: 0 0 0 auto;
             background: linear-gradient(90deg, #ff7f24, #ff9548);
             width: 0%;
+            transform: rotate(90deg);
             transition: width 0.2s ease-in-out;
         }
 
@@ -425,6 +426,7 @@
 
         function unityLoaded() {
             document.querySelector("#loading-cover").style.display = "none";
+            console.log("✅ 移动端状态加载成功");
             sendMobileStatusToUnity();
         }
 
@@ -453,7 +455,6 @@
                 ).then((unityInstance) => {
                     window.unityInstance = unityInstance;
                     RequestWebcam();
-                    unityLoaded();
                     loadingBar.style.display = "none";
                 });
                 loadingBar.style.display = "block";
@@ -469,7 +470,8 @@
             };
 
             window.requestingForPermissions = false;
-            async function RequestWebcam(){
+            async function RequestWebcam() {
+                unityLoaded();
                 window.requestingForPermissions = true;
                 try{
                     window.webcamStream = await navigator.mediaDevices.getUserMedia(window.WEBCAM_SETTINGS);
