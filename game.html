@@ -404,16 +404,17 @@
 
                 document.getElementById("startARDiv").style.display = "none";
                 createUnityInstance(document.querySelector("#unity-canvas"), {
-                    dataUrl: "Build/MicrocosmOfPharmacy.data",
-                    frameworkUrl: "Build/MicrocosmOfPharmacy.framework.js",
-                    codeUrl: "Build/MicrocosmOfPharmacy.wasm",
+                    dataUrl: "Build/MicrocosmOfPharmacy.data.unityweb",
+                    frameworkUrl: "Build/MicrocosmOfPharmacy.framework.js.unityweb",
+                    codeUrl: "Build/MicrocosmOfPharmacy.wasm.unityweb",
                     streamingAssetsUrl: "StreamingAssets",
                     companyName: "NanJingYaoYu",
                     productName: "MicrocosmOfPharmacy",
                     productVersion: "0.1",
                     //webglContextAttributes: { "preserveDrawingBuffer": true },
                     // matchWebGLToCanvasSize: false, // 取消注释可单独控制 WebGL 画布渲染尺寸和 DOM 元素尺寸
-                    // devicePixelRatio: 1, // 取消注释可在高 DPI 显示器上覆盖低 DPI 渲染
+                    devicePixelRatio: 1, // 取消注释可在高 DPI 显示器上覆盖低 DPI 渲染
+                    autoSyncPersistentDataPath: true,
                     },
                     (progress) => {
                         progressBarFull.style.width = 100 * progress + "%";
