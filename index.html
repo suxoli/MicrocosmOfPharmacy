@@ -98,8 +98,8 @@
         /* ========== 进度条基础样式 ========== */
         .progress-bar {
             width: 100%;
-            height: 8px;
-            border-radius: 4px;
+            height: 12px;
+            border-radius: 6px;
             overflow: hidden;
             background-color: #f8f8f8;
             position: relative;
@@ -133,8 +133,8 @@
             }
 
             .loading-bar--mobile .progress-bar {
-                width: 24px;
-                height: 200px;
+                width: 30px;
+                height: 220px;
             }
 
             .loading-bar--mobile .progress-bar__fill {
@@ -466,12 +466,24 @@
                     RequestWebcam();
                 });
             }
+
+            // 摄像头缩放倍率（1.0=原始尺寸，>1=放大，<1=缩小，建议1.0~3.0）
+            window.cameraZoomFactor = 1.5;
+            // 是否优先使用硬件缩放（false则强制使用Canvas渲染缩放）
+            window.useHardwareZoom = true;
+
             //在此设置摄像头朝向 ('environment' 后置, 'user' 前置, '' 自动)
 		window.unityFacingMode = "user"
 
             window.WEBCAM_SETTINGS = {
                 video: {
                     facingMode: unityFacingMode,
+                    // 硬件缩放约束（不同浏览器兼容）
+                    ...(window.useHardwareZoom ? {
+                        zoom: window.cameraZoomFactor, // 标准参数
+                        'mozZoom': window.cameraZoomFactor, // Firefox
+                        'webkitZoom': window.cameraZoomFactor, // Chrome/Safari
+                    } : {})
                 },
                 audio: false
             };
